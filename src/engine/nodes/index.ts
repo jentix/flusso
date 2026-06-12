@@ -14,3 +14,7 @@ import './textSource';
 import './distributeAlongPath';
 import './transformModulate';
 import './emojiInstancer';
+import './imageSource';
+import './videoSource';
+import './ditherHalftone';
+import './transformObject';

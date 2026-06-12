@@ -44,11 +44,32 @@ export function TopBar() {
     engine.load((await res.json()) as PatchJSON);
   };
 
+  const DEMOS: { file: string; label: string }[] = [
+    { file: 'patch.json', label: 'Demo patch' },
+    { file: 'text-equalizer.json', label: 'Text equalizer' },
+    { file: 'halftone.json', label: 'Halftone' },
+    { file: 'halftone-motion.json', label: 'Halftone motion' },
+  ];
+
   return (
     <div className="topbar">
       <strong>Flusso</strong>
-      <button onClick={() => loadDemo('patch.json')}>Demo patch</button>
-      <button onClick={() => loadDemo('text-equalizer.json')}>Text equalizer</button>
+      <select
+        className="demo-select"
+        value=""
+        onChange={(e) => {
+          if (e.target.value) loadDemo(e.target.value);
+        }}
+      >
+        <option value="" disabled>
+          Demos…
+        </option>
+        {DEMOS.map((d) => (
+          <option key={d.file} value={d.file}>
+            {d.label}
+          </option>
+        ))}
+      </select>
       <button onClick={save}>Save</button>
       <button onClick={loadFromStorage}>Load saved</button>
       <button onClick={() => fileInput.current?.click()}>Load file…</button>
