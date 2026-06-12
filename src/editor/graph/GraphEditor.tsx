@@ -67,6 +67,14 @@ export function GraphEditor() {
     [engine],
   );
 
+  // Double-click an edge to remove the connection (besides select + Delete).
+  const onEdgeDoubleClick = useCallback(
+    (_: unknown, edge: Edge) => {
+      engine.graph.disconnect(edge.id);
+    },
+    [engine],
+  );
+
   const isValidConnection: IsValidConnection = useCallback(
     (conn) => {
       if (!conn.source || !conn.target || !conn.sourceHandle || !conn.targetHandle) return false;
@@ -98,6 +106,7 @@ export function GraphEditor() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onEdgeDoubleClick={onEdgeDoubleClick}
         isValidConnection={isValidConnection}
         defaultEdgeOptions={defaultEdgeOptions}
         deleteKeyCode={['Backspace', 'Delete']}

@@ -40,6 +40,10 @@ export function TopBar() {
     engine.load(JSON.parse(await file.text()) as PatchJSON);
   };
 
+  const newProject = () => {
+    if (confirm('Create an empty project? Unsaved changes will be lost.')) engine.newProject();
+  };
+
   const loadDemo = async (file: string) => {
     const res = await fetch(`/demo/${file}`);
     engine.load((await res.json()) as PatchJSON);
@@ -71,6 +75,7 @@ export function TopBar() {
           </option>
         ))}
       </select>
+      <button onClick={newProject}>New</button>
       <button onClick={save}>Save</button>
       <button onClick={loadFromStorage}>Load saved</button>
       <button onClick={() => fileInput.current?.click()}>Load file…</button>

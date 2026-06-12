@@ -58,4 +58,10 @@ export class Engine {
     this.evaluator.disposeAll();
     loadGraph(this.graph, patch);
   }
+
+  /** Reset to an empty project: tear down node resources and clear the graph. */
+  newProject(): void {
+    this.evaluator.disposeAll();
+    this.graph.clear();
+  }
 }
