@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "nodes": [
+    { "id": "audio1", "type": "audioSource", "params": { "source": "mic", "file": "", "playing": true, "level": 1 }, "position": { "x": 40, "y": 60 } },
+    { "id": "spec1", "type": "spectrum", "params": { "bands": 24, "gain": 1.4, "attack": 0.6, "release": 0.12, "logScale": true }, "position": { "x": 320, "y": 60 } },
+    { "id": "svg1", "type": "svgPath", "params": { "file": "", "samples": 256, "scale": 6, "center": true }, "position": { "x": 40, "y": 420 } },
+    { "id": "text1", "type": "textSource", "params": { "text": "🔥🎵✨" }, "position": { "x": 320, "y": 560 } },
+    { "id": "dist1", "type": "distributeAlongPath", "params": { "count": 32 }, "position": { "x": 320, "y": 380 } },
+    { "id": "mod1", "type": "transformModulate", "params": { "mode": "scaleUniform", "amount": 2.5, "baseScale": 0.35 }, "position": { "x": 620, "y": 220 } },
+    { "id": "emoji1", "type": "emojiInstancer", "params": { "size": 1, "billboard": true }, "position": { "x": 900, "y": 300 } },
+    { "id": "out1", "type": "sceneOutput", "params": { "background": "#101014" }, "position": { "x": 1180, "y": 300 } }
+  ],
+  "connections": [
+    { "id": "c1", "from": { "nodeId": "audio1", "portId": "audio" }, "to": { "nodeId": "spec1", "portId": "audio" } },
+    { "id": "c2", "from": { "nodeId": "svg1", "portId": "path" }, "to": { "nodeId": "dist1", "portId": "path" } },
+    { "id": "c3", "from": { "nodeId": "dist1", "portId": "points" }, "to": { "nodeId": "mod1", "portId": "points" } },
+    { "id": "c4", "from": { "nodeId": "spec1", "portId": "spectrum" }, "to": { "nodeId": "mod1", "portId": "spectrum" } },
+    { "id": "c5", "from": { "nodeId": "mod1", "portId": "transforms" }, "to": { "nodeId": "emoji1", "portId": "transforms" } },
+    { "id": "c6", "from": { "nodeId": "text1", "portId": "text" }, "to": { "nodeId": "emoji1", "portId": "text" } },
+    { "id": "c7", "from": { "nodeId": "emoji1", "portId": "object" }, "to": { "nodeId": "out1", "portId": "object" } }
+  ]
+}
