@@ -7,7 +7,7 @@ interface EmojiInstancerState {
   group: THREE.Group;
   meshes: THREE.InstancedMesh[];
   textures: THREE.CanvasTexture[];
-  geometry: THREE.PlaneGeometry;
+  geometries: THREE.PlaneGeometry[];
   builtKey: string;
   glyphs: string[];
   cursors: number[];
@@ -17,20 +17,37 @@ interface EmojiInstancerState {
   scratchScale: THREE.Vector3;
 }
 
-const TEX_SIZE = 128;
+const TEX_SIZE = 256;
 
-/** Emoji are color bitmap glyphs — rasterize to canvas, no outline extrusion possible. */
-function rasterizeGlyph(glyph: string): THREE.CanvasTexture {
+/**
+ * Glyphs are rasterized to canvas textures (emoji are color bitmaps — no
+ * outline extrusion possible; plain text gets `color`). Canvas width follows
+ * the glyph's advance so quads are tight and undistorted.
+ */
+function rasterizeGlyph(
+  glyph: string,
+  font: string,
+  color: string,
+): { tex: THREE.CanvasTexture; aspect: number } {
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = TEX_SIZE;
+  const fontPx = TEX_SIZE * 0.8;
+  const fontSpec = `${fontPx}px ${font}`;
+  const measure = canvas.getContext('2d')!;
+  measure.font = fontSpec;
+  // small horizontal padding so italics/overhangs don't clip
+  const width = (measure.measureText(glyph).width || fontPx) + fontPx * 0.1;
+  const aspect = Math.min(4, Math.max(0.2, width / TEX_SIZE));
+  canvas.width = Math.ceil(TEX_SIZE * aspect);
+  canvas.height = TEX_SIZE;
   const ctx = canvas.getContext('2d')!;
-  ctx.font = `${TEX_SIZE * 0.8}px sans-serif`;
+  ctx.font = fontSpec;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(glyph, TEX_SIZE / 2, TEX_SIZE / 2 + TEX_SIZE * 0.04);
+  ctx.fillStyle = color;
+  ctx.fillText(glyph, canvas.width / 2, TEX_SIZE / 2 + TEX_SIZE * 0.04);
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  return { tex, aspect };
 }
 
 function disposeMeshes(state: EmojiInstancerState): void {
@@ -40,13 +57,15 @@ function disposeMeshes(state: EmojiInstancerState): void {
     mesh.dispose();
   }
   for (const tex of state.textures) tex.dispose();
+  for (const geo of state.geometries) geo.dispose();
   state.meshes = [];
   state.textures = [];
+  state.geometries = [];
 }
 
 registerNode<EmojiInstancerState>({
   type: 'emojiInstancer',
-  label: 'Emoji Instancer',
+  label: 'Glyph Instancer',
   category: 'geometry',
   inputs: [
     { id: 'transforms', type: 'transforms', label: 'Transforms' },
@@ -56,6 +75,9 @@ registerNode<EmojiInstancerState>({
   params: [
     { id: 'size', kind: 'number', label: 'Size', default: 1, min: 0.05, max: 10, step: 0.05 },
     { id: 'billboard', kind: 'boolean', label: 'Billboard', default: true },
+    { id: 'font', kind: 'string', label: 'Font', default: 'sans-serif' },
+    { id: 'color', kind: 'color', label: 'Color', default: '#ffffff' },
+    { id: 'anchorY', kind: 'select', label: 'Anchor', default: 'center', options: ['center', 'bottom'] },
   ],
   hot: true,
   init() {
@@ -63,7 +85,7 @@ registerNode<EmojiInstancerState>({
       group: new THREE.Group(),
       meshes: [],
       textures: [],
-      geometry: new THREE.PlaneGeometry(1, 1),
+      geometries: [],
       builtKey: '',
       glyphs: [],
       cursors: [],
@@ -77,7 +99,10 @@ registerNode<EmojiInstancerState>({
     const transforms = inputs.transforms as TransformsData | undefined;
     const text = ((inputs.text as string) ?? '🎵') || '🎵';
     const count = transforms?.count ?? 0;
-    const key = `${text}|${count}`;
+    const font = params.font as string;
+    const color = params.color as string;
+    const anchorY = params.anchorY as string;
+    const key = `${text}|${count}|${font}|${color}|${anchorY}`;
 
     // Cold rebuild: re-rasterize textures / re-create instanced meshes only
     // when text or instance count changes. Dispose old GPU resources first.
@@ -89,14 +114,18 @@ registerNode<EmojiInstancerState>({
       // instances assigned round-robin: glyph g gets ceil-ish share of count
       for (let g = 0; g < state.glyphs.length; g++) {
         const n = Math.floor(count / state.glyphs.length) + (g < count % state.glyphs.length ? 1 : 0);
-        const tex = rasterizeGlyph(state.glyphs[g]);
+        const { tex, aspect } = rasterizeGlyph(state.glyphs[g], font, color);
+        const geometry = new THREE.PlaneGeometry(aspect, 1);
+        // bottom anchor: scaleY grows upward from the baseline (equalizer bars)
+        if (anchorY === 'bottom') geometry.translate(0, 0.5, 0);
         const mesh = new THREE.InstancedMesh(
-          state.geometry,
+          geometry,
           new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.1, side: THREE.DoubleSide }),
           Math.max(1, n),
         );
         mesh.count = n;
         state.textures.push(tex);
+        state.geometries.push(geometry);
         state.meshes.push(mesh);
         state.group.add(mesh);
       }
@@ -137,7 +166,6 @@ registerNode<EmojiInstancerState>({
   },
   dispose(state) {
     disposeMeshes(state);
-    state.geometry.dispose();
     state.group.removeFromParent();
   },
 });

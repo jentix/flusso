@@ -16,6 +16,9 @@ registerNode<ModulateState>({
   inputs: [
     { id: 'points', type: 'path', label: 'Points' },
     { id: 'spectrum', type: 'spectrum', label: 'Spectrum' },
+    // optional number overrides — undefined when unconnected, falls back to param
+    { id: 'amount', type: 'number', label: 'Amount' },
+    { id: 'baseScale', type: 'number', label: 'Base' },
   ],
   outputs: [{ id: 'transforms', type: 'transforms', label: 'Transforms' }],
   params: [
@@ -48,8 +51,8 @@ registerNode<ModulateState>({
     }
 
     const mode = params.mode as string;
-    const amount = params.amount as number;
-    const base = params.baseScale as number;
+    const amount = (inputs.amount as number) ?? (params.amount as number);
+    const base = (inputs.baseScale as number) ?? (params.baseScale as number);
     const bins = spectrum?.bins;
     const binCount = spectrum?.binCount ?? 0;
 

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "nodes": [
+    { "id": "text1", "type": "textSource", "params": { "text": "FLUSSO" }, "position": { "x": 40, "y": 320 } },
+    { "id": "layout1", "type": "textLayout", "params": { "width": 4, "spacing": 0.1, "monospace": false, "font": "sans-serif" }, "position": { "x": 320, "y": 320 } },
+    { "id": "noise1", "type": "noise", "params": { "speed": 1.2, "seed": 7, "octaves": 2, "amplitude": 1, "offset": 0, "bins": 6 }, "position": { "x": 320, "y": 60 } },
+    { "id": "audio1", "type": "audioSource", "params": { "source": "mic", "file": "", "playing": true, "level": 1 }, "position": { "x": 40, "y": 560 } },
+    { "id": "spec1", "type": "spectrum", "params": { "bands": 6, "gain": 1.4, "attack": 0.6, "release": 0.12, "logScale": true }, "position": { "x": 320, "y": 560 } },
+    { "id": "mix1", "type": "mix", "params": { "mode": "add", "mix": 0.5 }, "position": { "x": 620, "y": 460 } },
+    { "id": "mod1", "type": "transformModulate", "params": { "mode": "scaleY", "amount": 3, "baseScale": 0.8 }, "position": { "x": 620, "y": 140 } },
+    { "id": "glyph1", "type": "emojiInstancer", "params": { "size": 1, "billboard": false, "font": "sans-serif", "color": "#4dd0e1", "anchorY": "bottom" }, "position": { "x": 900, "y": 300 } },
+    { "id": "out1", "type": "sceneOutput", "params": { "background": "#101014" }, "position": { "x": 1180, "y": 300 } }
+  ],
+  "connections": [
+    { "id": "c1", "from": { "nodeId": "text1", "portId": "text" }, "to": { "nodeId": "layout1", "portId": "text" } },
+    { "id": "c2", "from": { "nodeId": "text1", "portId": "text" }, "to": { "nodeId": "glyph1", "portId": "text" } },
+    { "id": "c3", "from": { "nodeId": "layout1", "portId": "points" }, "to": { "nodeId": "mod1", "portId": "points" } },
+    { "id": "c4", "from": { "nodeId": "noise1", "portId": "spectrum" }, "to": { "nodeId": "mix1", "portId": "specA" } },
+    { "id": "c8", "from": { "nodeId": "spec1", "portId": "spectrum" }, "to": { "nodeId": "mix1", "portId": "specB" } },
+    { "id": "c9", "from": { "nodeId": "mix1", "portId": "spectrum" }, "to": { "nodeId": "mod1", "portId": "spectrum" } },
+    { "id": "c5", "from": { "nodeId": "mod1", "portId": "transforms" }, "to": { "nodeId": "glyph1", "portId": "transforms" } },
+    { "id": "c6", "from": { "nodeId": "glyph1", "portId": "object" }, "to": { "nodeId": "out1", "portId": "object" } },
+    { "id": "c7", "from": { "nodeId": "audio1", "portId": "audio" }, "to": { "nodeId": "spec1", "portId": "audio" } }
+  ]
+}

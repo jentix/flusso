@@ -1,6 +1,10 @@
 // Importing this barrel registers every node type.
 import './time';
 import './math';
+import './lfo';
+import './noise';
+import './mix';
+import './textLayout';
 import './box';
 import './sceneOutput';
 import './audioSource';

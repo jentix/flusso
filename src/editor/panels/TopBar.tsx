@@ -39,15 +39,16 @@ export function TopBar() {
     engine.load(JSON.parse(await file.text()) as PatchJSON);
   };
 
-  const loadDemo = async () => {
-    const res = await fetch('/demo/patch.json');
+  const loadDemo = async (file: string) => {
+    const res = await fetch(`/demo/${file}`);
     engine.load((await res.json()) as PatchJSON);
   };
 
   return (
     <div className="topbar">
       <strong>Flusso</strong>
-      <button onClick={loadDemo}>Demo patch</button>
+      <button onClick={() => loadDemo('patch.json')}>Demo patch</button>
+      <button onClick={() => loadDemo('text-equalizer.json')}>Text equalizer</button>
       <button onClick={save}>Save</button>
       <button onClick={loadFromStorage}>Load saved</button>
       <button onClick={() => fileInput.current?.click()}>Load file…</button>
