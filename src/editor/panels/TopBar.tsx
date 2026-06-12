@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useEngine } from '../engineContext';
+import { useEditorStore } from '../store';
 import type { PatchJSON } from '../../engine/graph/serialize';
 
 const STORAGE_KEY = 'flusso-patch';
@@ -84,6 +85,9 @@ export function TopBar() {
         }}
       />
       <span className="spacer" />
+      <button onClick={() => useEditorStore.getState().setFullscreen(true)} title="Esc to exit">
+        ⛶ Fullscreen
+      </button>
       <button onClick={enableAudio} className={`audio-btn ${audioState}`}>
         {audioState === 'on' ? '🎤 Audio on' : audioState === 'error' ? 'Audio error' : 'Enable audio (mic)'}
       </button>

@@ -245,6 +245,22 @@ body,
   color: #8fe0b4;
 }
 
+/* fullscreen mode: viewport only, no chrome; Esc exits */
+.app.fullscreen .topbar {
+  display: none;
+}
+
+.app.fullscreen .viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #16161a;
+}
+
+.app.fullscreen .viewport .fps {
+  display: none;
+}
+
 /* viewport */
 .viewport {
   position: relative;

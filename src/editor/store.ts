@@ -11,6 +11,9 @@ export interface FlowNodeData extends Record<string, unknown> {
 interface EditorState {
   nodes: Node<FlowNodeData>[];
   edges: Edge[];
+  /** Viewport-only presentation mode; Esc exits. */
+  fullscreen: boolean;
+  setFullscreen(on: boolean): void;
   sync(engine: Engine): void;
 }
 
@@ -23,6 +26,10 @@ interface EditorState {
 export const useEditorStore = create<EditorState>((set, get) => ({
   nodes: [],
   edges: [],
+  fullscreen: false,
+  setFullscreen(on) {
+    set({ fullscreen: on });
+  },
   sync(engine: Engine) {
     const prev = new Map(get().nodes.map((n) => [n.id, n]));
     const nodes: Node<FlowNodeData>[] = [...engine.graph.nodes.values()].map((n) => {
